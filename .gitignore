@@ -57,3 +57,24 @@ backend/exports/
 
 # TestSprite
 testsprite_tests/
+
+# Tools cache
+.tools/
+
+# Flutter
+flutter_pos_app/build/
+flutter_pos_app/.dart_tool/
+flutter_pos_app/.packages
+flutter_pos_app/.flutter-plugins
+flutter_pos_app/.flutter-plugins-dependencies
+flutter_rider_app/
+flutter_pos_app/android/.gradle/
+flutter_pos_app/android/local.properties
+flutter_pos_app/android/key.properties
+flutter_pos_app/ios/Pods/
+flutter_pos_app/ios/.symlinks/
+flutter_pos_app/linux/flutter/ephemeral/
+flutter_pos_app/macos/Pods/
+flutter_pos_app/macos/.symlinks/
+flutter_pos_app/web/.dart_tool/
+flutter_pos_app/windows/flutter/ephemeral/
