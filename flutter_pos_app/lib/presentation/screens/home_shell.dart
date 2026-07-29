@@ -6,10 +6,12 @@ import '../../main.dart';
 import '../../core/network/socket_client.dart';
 import '../providers/cart_provider.dart';
 import '../providers/kds_provider.dart';
+import '../providers/notification_provider.dart';
 import 'customers_screen.dart';
 import 'dashboard_screen.dart';
 import 'inventory_screen.dart';
 import 'login_screen.dart';
+import 'notifications_screen.dart';
 import 'pos_main_screen.dart';
 import 'purchases_screen.dart';
 import 'reports_screen.dart';
@@ -42,6 +44,12 @@ class _HomeShellState extends State<HomeShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<KdsProvider>().init(socket);
+        final notificationProvider = context.read<NotificationProvider>();
+        notificationProvider.fetchNotifications();
+        socket.onNotificationNew = (data) {
+          notificationProvider.addNotificationFromSocket(data);
+          localNotificationService.showNotificationFromEvent(data);
+        };
         socket.onOrderUpdated = (data) {
           final status = data['status'] as String?;
           if (status == 'ready') {
@@ -51,6 +59,11 @@ class _HomeShellState extends State<HomeShell> {
               final msg = tableNumber != null
                   ? 'الطلب #$orderNumber جاهز للاستلام (طاولة $tableNumber) 🍽️'
                   : 'الطلب #$orderNumber جاهز للاستلام ✅';
+              localNotificationService.showOrderNotification(
+                id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+                orderNumber: orderNumber,
+                type: 'order:updated',
+              );
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(msg, style: GoogleFonts.cairo()),
@@ -127,6 +140,8 @@ class _HomeShellState extends State<HomeShell> {
         return CustomersScreen(drawer: _buildDetailedDrawer(context));
       case 6:
         return SettingsScreen(user: widget.user, drawer: _buildDetailedDrawer(context));
+      case 7:
+        return NotificationsScreen(drawer: _buildDetailedDrawer(context));
       default:
         return DashboardScreen(userName: widget.user.nameAr, user: widget.user, drawer: _buildDetailedDrawer(context));
     }
@@ -290,6 +305,19 @@ class _HomeShellState extends State<HomeShell> {
                     Navigator.pop(context);
                     _navigateToModule(0);
                   },
+                ),
+
+                // Notifications (with unread badge)
+                Consumer<NotificationProvider>(
+                  builder: (context, np, _) => _drawerSubItem(
+                    icon: Icons.notifications_active_rounded,
+                    label: np.hasUnread ? 'التنبيهات (${np.unreadCount})' : 'التنبيهات',
+                    isSelected: _currentIndex == 7,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _navigateToModule(7);
+                    },
+                  ),
                 ),
 
                 const Divider(height: 1, indent: 16, endIndent: 16),

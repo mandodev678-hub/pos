@@ -1,5 +1,5 @@
-// Server Configuration - Trigger Restart (11)
-require('dotenv').config()
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '../.env') })
 const express = require('express')
 const http = require('http')
 const net = require('net')
@@ -7,7 +7,6 @@ const { Server } = require('socket.io')
 const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
-const path = require('path')
 const fs = require('fs')
 
 // Ensure data directory exists for SQLite
@@ -264,6 +263,14 @@ const startServer = async () => {
       await seedChartOfAccounts()
     } catch (coaErr) {
       logger.warn('Chart of Accounts seed skipped or failed:', coaErr.message)
+    }
+
+    // Seed initial data (admin user, branch, notifications — idempotent)
+    try {
+      const { seed: seedInitialData } = require('./scripts/seed-initial-data')
+      await seedInitialData()
+    } catch (seedErr) {
+      logger.warn('Initial data seed skipped or failed:', seedErr.message)
     }
 
     server.once('error', (listenErr) => {

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'core/services/notification_service.dart';
 import 'presentation/providers/cart_provider.dart';
 import 'presentation/providers/shift_provider.dart';
 import 'presentation/providers/kds_provider.dart';
+import 'presentation/providers/notification_provider.dart';
 import 'presentation/screens/login_screen.dart';
 
 // Design tokens — matched to web POS CSS variables
@@ -32,23 +34,41 @@ class AppColors {
   static const Color secondary = Color(0xFF9C27B0);
 }
 
+final localNotificationService = LocalNotificationService();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('ar', null);
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => ShiftProvider()),
-        ChangeNotifierProvider(create: (_) => KdsProvider()),
-      ],
-      child: const ZimamPosApp(),
-    ),
-  );
+  try {
+    await initializeDateFormatting('ar', null);
+  } catch (_) {}
+
+  try {
+    await localNotificationService.init();
+    localNotificationService.requestPermissions();
+  } catch (_) {}
+
+  runApp(const ZimamPosApp());
 }
 
 class ZimamPosApp extends StatelessWidget {
   const ZimamPosApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => ShiftProvider()),
+        ChangeNotifierProvider(create: (_) => KdsProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+      ],
+      child: _AppContent(),
+    );
+  }
+}
+
+class _AppContent extends StatelessWidget {
+  const _AppContent();
 
   @override
   Widget build(BuildContext context) {

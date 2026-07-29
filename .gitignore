@@ -42,6 +42,16 @@ pos/dist/
 website/dist/
 kds/dist/
 
+# Keystore
+*.jks
+*.keystore
+
+# Backup database
+*.bak
+
+# Downloads
+*.deb
+
 # Database files
 *.db
 backend/data/*.db

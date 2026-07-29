@@ -4,6 +4,7 @@ import '../constants/api_constants.dart';
 
 typedef OrderUpdatedCallback = void Function(Map<String, dynamic> data);
 typedef OrderNewCallback = void Function(Map<String, dynamic> data);
+typedef NotificationNewCallback = void Function(Map<String, dynamic> data);
 
 class SocketClient {
   static final SocketClient _instance = SocketClient._internal();
@@ -15,6 +16,7 @@ class SocketClient {
 
   OrderUpdatedCallback? onOrderUpdated;
   OrderNewCallback? onOrderNew;
+  NotificationNewCallback? onNotificationNew;
 
   bool _initialized = false;
 
@@ -50,6 +52,10 @@ class SocketClient {
 
     socket?.on('order:new', (data) {
       onOrderNew?.call(data as Map<String, dynamic>);
+    });
+
+    socket?.on('notification:new', (data) {
+      onNotificationNew?.call(data as Map<String, dynamic>);
     });
   }
 

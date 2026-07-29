@@ -1,0 +1,19 @@
+[Unit]
+Description=Zimam POS Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=elwens
+WorkingDirectory=/home/elwens/Desktop/POS/backend
+ExecStart=/usr/bin/node src/server.js
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3001
+Environment=DB_DIALECT=sqlite
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

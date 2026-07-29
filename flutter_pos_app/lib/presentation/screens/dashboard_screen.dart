@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:provider/provider.dart';
 import '../../data/models/dashboard_stats_model.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/dashboard_repository.dart';
+import '../providers/notification_provider.dart';
 import 'customers_screen.dart';
 import 'inventory_screen.dart';
 import 'login_screen.dart';
+import 'notifications_screen.dart';
 import 'pos_main_screen.dart';
 import 'purchases_screen.dart';
 import 'reports_screen.dart';
@@ -36,6 +39,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationProvider>().fetchNotifications();
+    });
   }
 
   Future<void> _loadData() async {
@@ -205,6 +211,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 28),
                     onPressed: () => Scaffold.of(ctx).openDrawer(),
                   ),
+                ),
+                Builder(
+                  builder: (ctx) {
+                    final unread = ctx.watch<NotificationProvider>().unreadCount;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                          onPressed: () {
+                            Navigator.push(
+                              ctx,
+                              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                            );
+                          },
+                        ),
+                        if (unread > 0)
+                          Positioned(
+                            left: 6,
+                            top: 6,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                              child: Text(
+                                unread > 99 ? '99+' : '$unread',
+                                style: GoogleFonts.cairo(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
                 const Spacer(),
                 Text(
@@ -933,6 +980,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             _drawerItem(Icons.dashboard_rounded, 'لوحة التحكم', () => Navigator.pop(context)),
+            Consumer<NotificationProvider>(
+              builder: (ctx, notifProv, _) => _drawerItem(
+                Icons.notifications_outlined,
+                notifProv.unreadCount > 0 ? 'التنبيهات (${notifProv.unreadCount})' : 'التنبيهات',
+                () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+                },
+              ),
+            ),
             _drawerItem(Icons.point_of_sale_rounded, 'نقطة البيع', () {
               Navigator.pop(context);
               Navigator.push(context, MaterialPageRoute(builder: (_) => PosMainScreen(user: widget.user!)));

@@ -94,4 +94,10 @@ class ApiConstants {
   // Refunds
   static const String refunds = '/refunds';
   static String refundById(String id) => '/refunds/$id';
+
+  // Notifications
+  static const String notifications = '/notifications';
+  static String notificationRead(String id) => '/notifications/$id/read';
+  static const String notificationReadAll = '/notifications/read-all';
+  static const String notificationCleanup = '/notifications/cleanup';
 }

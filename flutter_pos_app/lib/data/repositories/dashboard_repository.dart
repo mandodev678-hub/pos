@@ -24,10 +24,12 @@ class DashboardRepository {
           if (input.containsKey('orders') && input['orders'] is List) return input['orders'] as List;
           if (input.containsKey('items') && input['items'] is List) return input['items'] as List;
           if (input.containsKey('lowStock') && input['lowStock'] is List) return input['lowStock'] as List;
-          if (input.containsKey('outOfStock') && input['outOfStock'] is List) return [
-            ...input['lowStock'] as List,
-            ...input['outOfStock'] as List,
-          ];
+          if (input.containsKey('outOfStock') && input['outOfStock'] is List) {
+            return [
+              ...(input['lowStock'] is List ? input['lowStock'] as List : []),
+              ...input['outOfStock'] as List,
+            ];
+          }
         }
         return [];
       }
